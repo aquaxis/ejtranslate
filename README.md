@@ -102,4 +102,4 @@ OLLAMA_HOST=http://my-ollama:11434 ejtranslate notes.md
 
 ## License
 
-[MIT](./LISENCE.md). Copyright © 2026.
+[MIT](./LISENCE.md). Copyright ©AQUAXIS TECHNOLOGY 2026.
