@@ -1,0 +1,20 @@
+.aiprj
+AI_LOG/
+AI_PRJ_REQUIREMENTS.md
+AI_PRJ_DESIGN.md
+AI_PRJ_TASKS.md
+
+# Claude Code / MCP local configuration (not part of the application)
+.claude/
+.mcp.json
+
+# Ad-hoc test files at the repo root
+/test*.md
+
+# Generated translation outputs in samples/ (regenerable via the binary)
+samples/*_*.md
+
+
+# Added by cargo
+
+/target

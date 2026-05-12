@@ -6,32 +6,49 @@ A small Rust CLI that translates between **English and Japanese** using a local 
 
 - A Rust toolchain (stable, 1.75+).
 - A running local Ollama server (`ollama serve`).
-- The translation model pulled locally:
+- At least one supported translation model pulled locally (see [Models](#models)). For the default:
 
   ```bash
   ollama pull translategemma:12b
   ```
 
-  The smaller `translategemma:4b` does not reliably follow the Japanese instruction prompt on Japanese input; the 12B variant is the default.
+## Models
+
+The `-m` / `--model` flag accepts any Ollama model name. The documented choices are:
+
+| Model | Notes |
+|-------|-------|
+| `translategemma:12b` | **Default.** Reliable in both directions. |
+| `translategemma:4b`  | Smaller, faster, lower memory. Reliable for EN→JA; less reliable for JA→EN (may echo the input). Use when memory is constrained. |
+| `transgemma:e4b`     | Alternative model. Pull with `ollama pull transgemma:e4b`. |
+
+Select a non-default model with `-m`:
+
+```bash
+ejtranslate -m translategemma:4b notes.md
+ejtranslate -m transgemma:e4b notes.md
+```
+
+Any other Ollama model name is also accepted; an unknown name surfaces Ollama's `404 model 'X' not found` response.
 
 ## Install
 
 One-liner (uses `cargo install` to build from source):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<owner>/ejtranslate/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/aquaxis/ejtranslate/main/install.sh | sh
 ```
 
 Or directly:
 
 ```bash
-cargo install --git https://github.com/<owner>/ejtranslate ejtranslate
+cargo install --git https://github.com/aquaxis/ejtranslate ejtranslate
 ```
 
 Or from a local checkout:
 
 ```bash
-git clone https://github.com/<owner>/ejtranslate.git
+git clone https://github.com/aquaxis/ejtranslate.git
 cd ejtranslate
 cargo install --path .
 ```
