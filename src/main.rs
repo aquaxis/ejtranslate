@@ -8,7 +8,7 @@ use clap::Parser;
 use crate::io_files::{detect_lang, resolve_output, target_lang};
 
 const SYSTEM_PROMPT: &str =
-    "次の文章の言語を判断し、日本語の場合は英語、英語の場合は日本語に変換する。回答は変換後の文章のみとする。\n";
+    "Detect the language of the following text. If it is Japanese, translate it to English; if it is English, translate it to Japanese. Preserve any Markdown structure (headings, lists, code fences). Output only the translated text, with no commentary.\n";
 
 #[tokio::main]
 async fn main() -> Result<()> {
