@@ -5,44 +5,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Lang {
-    Ja,
-    En,
-}
-
-impl Lang {
-    pub fn two_letter(self) -> &'static str {
-        match self {
-            Lang::Ja => "ja",
-            Lang::En => "en",
-        }
-    }
-}
-
-pub fn detect_lang(input: &str) -> Lang {
-    for c in input.chars() {
-        let cp = c as u32;
-        let is_ja = matches!(cp,
-            0x3040..=0x309F  // Hiragana
-            | 0x30A0..=0x30FF  // Katakana (includes Prolonged Sound Mark U+30FC)
-            | 0x4E00..=0x9FFF  // CJK Unified Ideographs
-        );
-        if is_ja {
-            return Lang::Ja;
-        }
-    }
-    Lang::En
-}
-
-pub fn target_lang(src: Lang) -> Lang {
-    match src {
-        Lang::Ja => Lang::En,
-        Lang::En => Lang::Ja,
-    }
-}
-
-pub fn resolve_output(input: &Path, explicit: Option<&Path>, target: Lang) -> PathBuf {
+pub fn resolve_output(input: &Path, explicit: Option<&Path>) -> PathBuf {
     if let Some(p) = explicit {
         return p.to_path_buf();
     }
@@ -51,9 +14,7 @@ pub fn resolve_output(input: &Path, explicit: Option<&Path>, target: Lang) -> Pa
         .map(|s| s.to_os_string())
         .unwrap_or_else(|| OsString::from("output"));
     let mut name = stem;
-    name.push("_");
-    name.push(target.two_letter());
-    name.push(".md");
+    name.push("_output.md");
     match input.parent() {
         Some(parent) if !parent.as_os_str().is_empty() => parent.join(name),
         _ => PathBuf::from(name),
