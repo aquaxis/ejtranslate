@@ -1,6 +1,6 @@
 # ejtranslate
 
-A small Rust CLI that translates between **English and Japanese** using a local [Ollama](https://ollama.com) server. The source language is detected from the input file; the model translates into the opposite language.
+A small Rust CLI that translates between **English and Japanese** using a local [Ollama](https://ollama.com) server. The translation direction is selected explicitly with `--ej` / `--je` and defaults to English → Japanese.
 
 ## Prerequisites
 
@@ -62,23 +62,33 @@ ejtranslate [OPTIONS] <INPUT> [OUTPUT]
 | Argument / Flag | Default | Description |
 |-----------------|---------|-------------|
 | `<INPUT>`       | —       | Path of the input text file (positional, required). |
-| `[OUTPUT]`      | derived | Path of the output text file (positional, optional). When omitted: `<input_stem>_<target_lang>.md` (e.g. `notes.md` → `notes_en.md` if the input is Japanese). |
+| `[OUTPUT]`      | derived | Path of the output text file (positional, optional). When omitted: `<input_stem>_output.md` (e.g. `notes.md` → `notes_output.md`). |
+| `--ej`          | (default) | Translate **English → Japanese**. Used when no direction flag is given. Mutually exclusive with `--je`. |
+| `--je`          | —       | Translate **Japanese → English**. Mutually exclusive with `--ej`. |
 | `-m`, `--model` | `translategemma:12b` | Ollama model name. |
 | `-H`, `--host`  | `http://localhost:11434` (or `$OLLAMA_HOST`) | Ollama base URL. |
 | `-w`, `--overwrite` | `false` | Replace the output file if it already exists. |
 
+Supplying both `--ej` and `--je` is a usage error (non-zero exit).
+
 ### Examples
 
-Translate a Japanese file, write to the derived path `notes_en.md`:
+Translate an English file to Japanese (default direction), writing to the derived path `notes_output.md`:
 
 ```bash
 ejtranslate notes.md
 ```
 
-Translate an English file with an explicit output path:
+Translate a Japanese file to English:
 
 ```bash
-ejtranslate hello.md hello.ja.md
+ejtranslate --je notes.md
+```
+
+Translate to Japanese with an explicit output path:
+
+```bash
+ejtranslate --ej hello.md hello.ja.md
 ```
 
 Re-run and overwrite the existing output:
@@ -96,8 +106,8 @@ OLLAMA_HOST=http://my-ollama:11434 ejtranslate notes.md
 ## How it works
 
 1. The input file is read as UTF-8.
-2. The source language is detected locally by scanning for Hiragana, Katakana, CJK Unified Ideographs, or the Katakana-Hiragana Prolonged Sound Mark. Anything else is treated as English.
-3. The fixed Japanese system prompt is prepended to the input and sent to Ollama's `/api/generate` endpoint with `stream: false`.
+2. The translation direction comes from the CLI flag (`--ej` / `--je`, default `--ej`) — the source language is **not** auto-detected.
+3. The direction-specific system prompt is sent in Ollama's `system` field and the input file is sent in the `prompt` field, to `/api/generate` with `stream: false`.
 4. The model's `response` field is written verbatim to the resolved output path.
 
 ## License
