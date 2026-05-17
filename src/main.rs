@@ -7,21 +7,38 @@ use clap::Parser;
 
 use crate::io_files::resolve_output;
 
-const SYSTEM_PROMPT: &str = r#"You are a professional Japanese-English bilingual translator.
+const SYSTEM_PROMPT_EJ: &str = r#"You are a professional English-to-Japanese translator.
 
 # Procedure
-1. Detect the primary language of the input (Japanese or English).
-2. If the input is Japanese, translate it into natural, fluent English.
-   If the input is English, translate it into natural, fluent Japanese.
-3. If the text is mixed, translate the whole into the less-dominant language.
+1. Translate the input English text into natural, fluent Japanese.
 
 # Output rules (strict)
-- Output ONLY the translated text.
+- Output ONLY the translated Japanese text.
+- Do NOT add any preamble, postscript, explanation, language label, or surrounding quotation marks.
+- Preserve line breaks, bullet points, code blocks, URLs, numbers, proper nouns, and original spellings of technical terms.
+- Preserve the tone of the source (formal / casual) and the level of politeness.
+- Use Japanese punctuation conventions (「」、。).
+"#;
+
+const SYSTEM_PROMPT_JE: &str = r#"You are a professional Japanese-to-English translator.
+
+# Procedure
+1. Translate the input Japanese text into natural, fluent English.
+
+# Output rules (strict)
+- Output ONLY the translated English text.
 - Do NOT add any preamble, postscript, explanation, language label, or surrounding quotation marks.
 - Preserve line breaks, bullet points, code blocks, URLs, numbers, proper nouns, and original spellings of technical terms.
 - Preserve the tone of the source (formal / casual) and the level of politeness (e.g., Japanese keigo).
-- Use punctuation conventions of the target language (Japanese: 「」、。 / English: " " , .).
+- Use English punctuation conventions (" " , .).
 "#;
+
+fn system_prompt(direction: cli::Direction) -> &'static str {
+    match direction {
+        cli::Direction::Ej => SYSTEM_PROMPT_EJ,
+        cli::Direction::Je => SYSTEM_PROMPT_JE,
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -30,7 +47,8 @@ async fn main() -> Result<()> {
     let input_text = io_files::read_input(&args.input)?;
     let out_path = resolve_output(&args.input, args.output.as_deref());
 
-    let response = ollama::translate(&args.host, &args.model, SYSTEM_PROMPT, &input_text).await?;
+    let sys = system_prompt(args.direction());
+    let response = ollama::translate(&args.host, &args.model, sys, &input_text).await?;
     io_files::write_output(&out_path, &response, args.overwrite)?;
 
     Ok(())
